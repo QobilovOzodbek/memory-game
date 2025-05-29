@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+{% block title %}Game 2{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game 2: So'zlarni yodlash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        #word-list {
+            user-select: none; /* So'zlarni copy qilishni to'sadi */
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="mb-4 text-center">O'yin 2: So'zlarni yodlash</h1>
+
+    <div id="word-list" class="mb-3 fs-4 text-center"></div>
+
+    <div id="input-area" class="mb-3" style="display:none;">
+        <input type="text" id="user-input" class="form-control" placeholder="So'zlarni vergul bilan kiriting" autocomplete="off" />
+    </div>
+
+    <div class="mb-3 text-center">
+        <button id="retry-btn" class="btn btn-warning me-2" disabled>Yangilash</button>
+        <button id="submit-btn" class="btn btn-success me-2" disabled>Yuborish</button>
+        <button id="end-btn" class="btn btn-danger">Tugatish</button>
+    </div>
+
+    <div id="result" class="fs-5 text-center"></div>
+</div>
+
+<script>
+    let currentWords = [];
+    let score = 0;
+    let attempts = 0;
+    let timerId = null;
+
+    const wordListEl = document.getElementById("word-list");
+    const inputArea = document.getElementById("input-area");
+    const userInput = document.getElementById("user-input");
+    const retryBtn = document.getElementById("retry-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const endBtn = document.getElementById("end-btn");
+    const resultEl = document.getElementById("result");
+
+    // So'zlarni serverdan olish va o'yinni boshlash
+    async function startGame() {
+        clearTimeout(timerId);
+        userInput.value = "";
+        resultEl.innerHTML = "";
+        inputArea.style.display = "none";
+        retryBtn.disabled = true;
+        submitBtn.disabled = true;
+        wordListEl.textContent = "So'zlar yuklanmoqda...";
+
+        const response = await fetch("/get_words");
+        currentWords = await response.json();
+
+        wordListEl.textContent = currentWords.join(", ");
+
+        // 5 sekunddan keyin so'zlarni yashirish va input ko'rsatish
+        timerId = setTimeout(() => {
+            wordListEl.textContent = "So'zlarni eslang!";
+            inputArea.style.display = "block";
+            userInput.focus();
+            retryBtn.disabled = false;
+            submitBtn.disabled = false;
+        }, 5000);
+    }
+
+    // Inputga yozilish bo'yicha submit tugmasini faollashtirish
+    userInput.addEventListener('input', () => {
+        submitBtn.disabled = userInput.value.trim().length === 0;
+    });
+
+    // Tekshirish funksiyasi
+    function checkWords() {
+        const inputWords = userInput.value.toLowerCase()
+            .split(',')
+            .map(w => w.trim())
+            .filter(w => w.length > 0);
+
+        let correctWords = [];
+        let incorrectWords = [];
+
+        inputWords.forEach(word => {
+            if (currentWords.includes(word)) {
+                if (!correctWords.includes(word)) correctWords.push(word);
+            } else {
+                if (!incorrectWords.includes(word)) incorrectWords.push(word);
+            }
+        });
+
+        attempts++;
+        score += correctWords.length;
+
+        resultEl.innerHTML = `
+            <span class="text-primary">Bu urinishda to‘g‘ri topilgan so‘zlar soni: <strong>${correctWords.length}</strong></span><br>
+            <span class="text-success">Umumiy to‘g‘ri so‘zlar soni: <strong>${score}</strong></span><br>
+            <span><strong>To‘g‘ri so‘zlar:</strong> ${correctWords.length ? correctWords.join(', ') : 'Yo‘q'}</span><br>
+            <span><strong>Noto‘g‘ri so‘zlar:</strong> ${incorrectWords.length ? incorrectWords.join(', ') : 'Yo‘q'}</span>
+        `;
+
+        retryBtn.disabled = true;
+        submitBtn.disabled = true;
+        inputArea.style.display = "none";
+        userInput.value = "";
+
+        // 5 soniyadan keyin yangi so'zlar yuklanadi avtomatik
+        timerId = setTimeout(() => {
+            retryBtn.disabled = false;
+            startGame();
+        }, 5000);
+    }
+
+    // Retry - yangi so'zlar olish
+    function retryGame() {
+        clearTimeout(timerId);
+        startGame();
+        resultEl.innerHTML = "";
+    }
+
+    // End o'yinni tugatish va yakuniy natijani ko'rsatish
+    function endGame() {
+        clearTimeout(timerId);
+        wordListEl.textContent = "";
+        inputArea.style.display = "none";
+        retryBtn.disabled = true;
+        submitBtn.disabled = true;
+        endBtn.disabled = true;
+
+        resultEl.innerHTML = `
+            <h3>O'yin yakunlandi!</h3>
+            <p>Siz jami <strong>${score}</strong> ta to‘g‘ri so‘z topdingiz ${attempts} urinishda.</p>
+            <button class="btn btn-primary" onclick="restartGame()">Yana o‘ynash</button>
+        `;
+    }
+
+    function restartGame() {
+        score = 0;
+        attempts = 0;
+        endBtn.disabled = false;
+        retryBtn.disabled = true;
+        submitBtn.disabled = true;
+        startGame();
+        resultEl.innerHTML = "";
+    }
+
+    // Tugmalar uchun event listenerlar
+    retryBtn.addEventListener("click", retryGame);
+    submitBtn.addEventListener("click", checkWords);
+    endBtn.addEventListener("click", endGame);
+
+    // O'yinni ishga tushirish
+    startGame();
+</script>
+
+</body>
+</html>
+{% endblock %}

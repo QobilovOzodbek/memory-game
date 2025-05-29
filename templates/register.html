@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h3 class="card-title text-center">Register</h3>
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nickname" class="form-label">Nickname</label>
+                    <input type="text" class="form-control" name="nickname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <button type="button" id="sendCodeBtn" class="btn btn-sm btn-primary mt-2">Send Code</button>
+                    <div id="codeStatus" class="form-text text-success mt-1"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="code" class="form-label">Verification Code</label>
+                    <input type="text" class="form-control" name="code" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Register</button>
+            </form>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="alert alert-warning mt-3">
+                  {% for msg in messages %}
+                    {{ msg }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#sendCodeBtn').click(function () {
+        const email = $('#email').val();
+        if (!email) {
+            alert("Please enter an email first.");
+            return;
+        }
+
+        $.post('/send-code', {email: email}, function (data) {
+            $('#codeStatus').text("Verification code sent!");
+        }).fail(function () {
+            $('#codeStatus').text("Failed to send code.");
+        });
+    });
+</script>
+</body>
+</html>

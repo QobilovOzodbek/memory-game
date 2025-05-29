@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        #edit-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+        <a class="navbar-brand" href="/">EsdaQol</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Bosh sahifa</a></li>
+                <li class="nav-item"><a class="nav-link" href="/about">Haqida</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/profile">Profil</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="/logout">Chiqish</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4"><i class="bi bi-person-circle"></i> Profil</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Profil ma'lumotlari -->
+        <div id="profile-view">
+            <p><i class="bi bi-person"></i> Ism: <strong>{{ user.name }}</strong></p>
+            <p><i class="bi bi-envelope"></i> Email: <strong>{{ user.email }}</strong></p>
+            <button class="btn btn-outline-primary" onclick="toggleEdit()">
+                <i class="bi bi-pencil-square"></i> Tahrirlash
+            </button>
+        </div>
+
+        <!-- Tahrirlash formasi -->
+        <div id="edit-form">
+            <form method="POST" action="/profile">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Yangi ism</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Yangi parol</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Yangi parol kiriting">
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Saqlash
+                </button>
+                <button type="button" class="btn btn-secondary ms-2" onclick="toggleEdit()">
+                    <i class="bi bi-x-circle"></i> Bekor qilish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleEdit() {
+            const view = document.getElementById('profile-view');
+            const form = document.getElementById('edit-form');
+
+            if (form.style.display === 'none') {
+                view.style.display = 'none';
+                form.style.display = 'block';
+            } else {
+                view.style.display = 'block';
+                form.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

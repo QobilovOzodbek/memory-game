@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Xotira rivojlantirish sahifasiga Xush kelibsiz</h1>
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">O'yin 1: Raqamni xotirada saqlash</h5>
+            <p class="card-text">5 xonali raqamni yodlab oling va u yo'qolganidan keyin uni eslang.</p>
+            <a href="{{ url_for('game1') }}" class="btn btn-primary">O'ynash</a>
+          </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">O'yin 2: So'zlarni xotirada saqlash</h5>
+            <p class="card-text">Ko'rsatilgan ro'yxatdan iloji boricha ko'proq so'zlarni eslab qoling.</p>
+            <a href="{{ url_for('game2') }}" class="btn btn-primary">O'ynash</a>
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
